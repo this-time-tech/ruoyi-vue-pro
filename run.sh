@@ -49,13 +49,45 @@ deploy_code() {
 
   #启动容器
   docker compose -f ./script/docker/docker-compose.yaml up -d
+}
 
+# 集群部署
+deploy_cluster() {
+  #检查docker是否安装
+  if ! command -v docker &>/dev/null; then
+    echo "docker could not be found, please install docker first"
+    exit 1
+  fi
+  #检查docker swarm是否启用
+  if ! docker info | grep -q "Swarm: active"; then
+    echo "Docker Swarm is not active, initializing swarm..."
+    docker swarm init
+  else
+    echo "Docker Swarm is already active"
+  fi
+  #  - node.labels.role == server
+  #检查节点是否存在
+  if ! docker node ls | grep -q "yudao-server"; then
+    echo "Node yudao-server does not exist, creating..."
+    docker node create --label role=server yudao-server
+  else
+    echo "Node yudao-server already exists"
+  fi
+
+  #启动容器
+  docker stack deploy -c docker-compose.yaml yudao-system-cluster
 }
 
 main() {
-  environment_check
-  download_code
-  deploy_code
+  # 询问用户是否集群部署，还是单机部署
+  read -p "Deploy in a cluster?--是否集群部署？(y/n): " choice
+  if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+    deploy_cluster
+  else
+    environment_check
+    download_code
+    deploy_code
+  fi
 }
 
 main
