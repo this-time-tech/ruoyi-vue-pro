@@ -45,9 +45,18 @@ deploy_code() {
     echo "docker could not be found, please install docker first"
     exit 1
   fi
-  #清理原有镜像
-  docker rmi -f yudao-server
-  docker rmi -f yudao-admin
+  # 检查 yudao-server 是否存在，存在则删除
+  if docker images -q yudao-server > /dev/null; then
+    echo "清理原有镜像，准备重新构建"
+    docker rmi -f yudao-server
+  fi
+
+  # 检查 yudao-admin 是否存在，存在则删除
+  if docker images -q yudao-admin > /dev/null; then
+    echo "清理原有镜像，准备重新构建"
+    docker rmi -f yudao-admin
+  fi
+
   #复制文件
   cp ./script/docker/docker-compose.yaml ./docker-compose.yaml
   #启动容器
