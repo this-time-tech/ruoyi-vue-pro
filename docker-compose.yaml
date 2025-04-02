@@ -1,10 +1,8 @@
-name: yudao-system
-
 services:
   mysql:
-    container_name: yudao-mysql
+    #container_name: yudao-mysql
     image: registry.cn-hangzhou.aliyuncs.com/one-registry/mysql:8
-    restart: unless-stopped
+    #restart: unless-stopped
     tty: true
     ports:
       - "3306:3306"
@@ -22,9 +20,9 @@ services:
       - my_network
 
   redis:
-    container_name: yudao-redis
+    #container_name: yudao-redis
     image: registry.cn-hangzhou.aliyuncs.com/one-registry/redis:6-alpine
-    restart: unless-stopped
+    #restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -33,17 +31,13 @@ services:
       - "6379:6379"
     volumes:
       - redis:/data
-    deploy:
-      placement:
-        constraints:
-          - node.labels.role == server
     networks:
       - my_network
 
   server:
-    container_name: yudao-server
+    #container_name: yudao-server
     image: registry.cn-hangzhou.aliyuncs.com/one-registry/yudao-server
-    restart: unless-stopped
+    #restart: unless-stopped
     ports:
       - "48080:48080"
     environment:
@@ -66,25 +60,19 @@ services:
     depends_on:
       - mysql
       - redis
-    deploy:
-      placement:
-        constraints:
-          - node.labels.role == server
     networks:
       - my_network
 
   admin:
-    container_name: yudao-admin
+    #container_name: yudao-admin
     image: registry.cn-hangzhou.aliyuncs.com/one-registry/yudao-admin
-    restart: unless-stopped
+    #restart: unless-stopped
     ports:
-      - "8080:80"
+      - "8888:80"
     depends_on:
+      - mysql
+      - redis
       - server
-    deploy:
-      placement:
-        constraints:
-          - node.labels.role == server
     networks:
       - my_network
 
