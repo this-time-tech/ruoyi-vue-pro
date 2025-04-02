@@ -97,7 +97,7 @@ deploy_cluster() {
     else
       echo "未能为节点 $LEADER_NODE_ID 添加标签 role=server。请手动添加标签以启动服务"
     fi
-
+  fi
   #复制文件
   cp ./script/docker/docker-compose-cluster.yaml ./docker-compose.yaml
   #启动容器
