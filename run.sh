@@ -72,21 +72,32 @@ deploy_cluster() {
     echo "docker could not be found, please install docker first"
     exit 1
   fi
+  
   #检查docker swarm是否启用
-  if ! docker info | grep -q "Swarm: active"; then
+  if ! docker node ls | grep "Ready"; then
     echo "Docker Swarm is not active, initializing swarm..."
     docker swarm init
-  else
-    echo "Docker Swarm is already active"
-  fi
-  #  - node.labels.role == server
-  #检查节点是否存在
-  if ! docker node ls | grep -q "yudao-server"; then
-    echo "Node yudao-server does not exist, creating..."
-    docker node create --label role=server yudao-server
-  else
-    echo "Node yudao-server already exists"
-  fi
+    # 获取所有节点的 ID 和 Manager 状态，并通过 grep 找到 Leader 节点
+    LEADER_NODE_ID=$(docker node ls --format '{{.ID}} {{.ManagerStatus}}' | grep 'Leader' | awk '{print $1}')
+
+    # 检查是否找到了 Leader 节点
+    if [ -z "$LEADER_NODE_ID" ]; then
+      echo "没有找到 Leader 节点"
+      exit 1
+    fi
+
+    # 给 Leader 节点添加标签
+    docker node update --label-add role=server $LEADER_NODE_ID
+    # 验证标签是否添加成功
+    LABELS=$(docker node inspect $LEADER_NODE_ID --format '{{.Spec.Labels}}')
+
+    # 检查是否成功添加了 role=server 标签
+    if echo "$LABELS" | grep "role:server"; then
+      echo "成功为节点 $LEADER_NODE_ID 添加标签 role=server"
+    else
+      echo "未能为节点 $LEADER_NODE_ID 添加标签 role=server。请手动添加标签以启动服务"
+    fi
+
   #复制文件
   cp ./script/docker/docker-compose-cluster.yaml ./docker-compose.yaml
   #启动容器
