@@ -1,8 +1,7 @@
 name: yudao-system
 
 services:
-  mysql:
-    container_name: yudao-mysql
+  yudao-mysql:
     image: mysql:8
     restart: unless-stopped
     tty: true
@@ -12,25 +11,29 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-ruoyi-vue-pro}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
     volumes:
-      - mysql:/var/lib/mysql/ # 持久化 MySQL 数据
-      - ./sql:/docker-entrypoint-initdb.d  # 读取 SQL 脚本并执行
+      - yudao-mysql:/var/lib/mysql/ # 持久化 MySQL 数据
+      - ./sql/mysql:/docker-entrypoint-initdb.d  # 读取 SQL 脚本并执行
+    healthcheck:
+      test: ["CMD-SHELL", "ls -la /var/lib/mysql/ruoyi@002dvue@002dpro/system_users.ibd"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 10s
 
-  redis:
-    container_name: yudao-redis
+  yudao-redis:
     image: redis:6-alpine
     mem_limit: 512m  # 限制最大内存 512MB
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis:/data
+      - yudao-redis:/data
 
-  server:
-    container_name: yudao-server
+  yudao-server:
     build:
       context: ./yudao-server/
     image: yudao-server
-    pull_policy: build  # 每次都重新构建
+    pull_policy: never  # 每次都重新构建
     restart: unless-stopped
     ports:
       - "48080:48080"
@@ -52,11 +55,10 @@ services:
         --spring.datasource.dynamic.datasource.slave.password=${SLAVE_DATASOURCE_PASSWORD:-123456}
         --spring.data.redis.host=${REDIS_HOST:-yudao-redis}
     depends_on:
-      - mysql
-      - redis
+      - yudao-mysql
+      - yudao-redis
 
-  admin:
-    container_name: yudao-admin
+  yudao-admin:
     build:
       context: ./yudao-ui/yudao-ui-admin-vue3/master/yudao-ui-admin-vue3
       args:
@@ -71,15 +73,15 @@ services:
           VUE_APP_DOC_ENABLE=${VUE_APP_DOC_ENABLE:-true}
           VUE_APP_BAIDU_CODE=${VUE_APP_BAIDU_CODE:-fadc1bd5db1a1d6f581df60a1807f8ab}
     image: yudao-admin
-    pull_policy: build  # 每次都重新构建
+    pull_policy: never  # 每次都重新构建
     restart: unless-stopped
     ports:
       - "8080:80"
     depends_on:
-      - server
+      - yudao-server
 
 volumes:
-  mysql:
+  yudao-mysql:
     driver: local
-  redis:
+  yudao-redis:
     driver: local

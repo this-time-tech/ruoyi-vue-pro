@@ -47,8 +47,15 @@ deploy_code() {
     exit 1
   fi
 
+  #复制文件
+  cp ./script/docker/docker-compose.yaml ./docker-compose.yaml
+
   #启动容器
-  docker compose -f ./script/docker/docker-compose.yaml up -d
+  docker compose up -d
+
+  echo "Deploy finished -- 部署完毕"
+
+  rm -rf ./docker-compose.yaml
 }
 
 # 集群部署
@@ -80,14 +87,14 @@ deploy_cluster() {
 
 main() {
   # 询问用户是否集群部署，还是单机部署
-  read -p "Deploy in a cluster?--是否集群部署？(y/n): " choice
-  if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-    deploy_cluster
-  else
+  #read -p "Deploy in a cluster?--是否集群部署？(y/n): " choice
+  #if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+    #deploy_cluster
+  #else
     environment_check
     download_code
     deploy_code
-  fi
+  #fi
 }
 
 main
