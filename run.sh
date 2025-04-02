@@ -20,7 +20,6 @@ download_code() {
     #回到当前目录
     cd ../../..
   fi
-
 }
 
 environment_check() {
@@ -49,12 +48,9 @@ deploy_code() {
 
   #复制文件
   cp ./script/docker/docker-compose.yaml ./docker-compose.yaml
-
   #启动容器
   docker compose up -d
-
   echo "Deploy finished -- 部署完毕"
-
   rm -rf ./docker-compose.yaml
 }
 
@@ -80,21 +76,24 @@ deploy_cluster() {
   else
     echo "Node yudao-server already exists"
   fi
-
+  #复制文件
+  cp ./script/docker/docker-compose-cluster.yaml ./docker-compose.yaml
   #启动容器
   docker stack deploy -c docker-compose.yaml yudao-system-cluster
+  echo "Deploy finished -- 部署完毕"
+  rm -rf ./docker-compose.yaml
 }
 
 main() {
   # 询问用户是否集群部署，还是单机部署
-  #read -p "Deploy in a cluster?--是否集群部署？(y/n): " choice
-  #if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-    #deploy_cluster
-  #else
+  read -p "Deploy in a cluster?--是否集群部署？(y/n): " choice
+  if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+    deploy_cluster
+  else
     environment_check
     download_code
     deploy_code
-  #fi
+  fi
 }
 
 main
