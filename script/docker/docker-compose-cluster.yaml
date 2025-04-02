@@ -38,7 +38,6 @@ services:
 
   yudao-server:
     image: registry.cn-hangzhou.aliyuncs.com/one-registry/yudao-server
-    pull_policy: always  # 每次都重新构建
     environment:
       ARGS:
         --spring.datasource.dynamic.datasource.master.url=${MASTER_DATASOURCE_URL:-jdbc:mysql://yudao-mysql:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true}
@@ -67,7 +66,6 @@ services:
 
   yudao-admin:
     image: registry.cn-hangzhou.aliyuncs.com/one-registry/yudao-admin
-    pull_policy: always  # 每次都重新构建
     ports:
       - "8888:80"
     depends_on:
