@@ -1,0 +1,84 @@
+services:
+  yudao-redis:
+    image: redis:6-alpine
+    mem_limit: 512m  # 限制最大内存 512MB
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - yudao-redis:/data
+
+  yudao-mysql:
+    image: mysql:8
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    volumes:
+      - yudao-mysql:/var/lib/mysql/ # 持久化 MySQL 数据
+      - ./sql/mysql:/docker-entrypoint-initdb.d  # 读取 SQL 脚本并执行
+    healthcheck:
+      test: ["CMD-SHELL", "ls -la /var/lib/mysql/ruoyi@002dvue@002dpro/system_users.ibd"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 10s
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-ruoyi-vue-pro}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+
+  yudao-server:
+    build:
+      context: ./yudao-server/
+    image: yudao-server
+    pull_policy: never  # 不要拉取（因为不存在这个镜像）
+    restart: unless-stopped
+    ports:
+      - "48080:48080"
+    environment:
+      ARGS:
+        --spring.datasource.dynamic.datasource.master.url=${MASTER_DATASOURCE_URL:-jdbc:mysql://yudao-mysql:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true}
+        --spring.datasource.dynamic.datasource.master.username=${MASTER_DATASOURCE_USERNAME:-root}
+        --spring.datasource.dynamic.datasource.master.password=${MASTER_DATASOURCE_PASSWORD:-123456}
+        --spring.datasource.dynamic.datasource.slave.url=${SLAVE_DATASOURCE_URL:-jdbc:mysql://yudao-mysql:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true}
+        --spring.datasource.dynamic.datasource.slave.username=${SLAVE_DATASOURCE_USERNAME:-root}
+        --spring.datasource.dynamic.datasource.slave.password=${SLAVE_DATASOURCE_PASSWORD:-123456}
+        --spring.data.redis.host=${REDIS_HOST:-yudao-redis}
+      SPRING_PROFILES_ACTIVE: local
+      JAVA_OPTS:
+        ${JAVA_OPTS:-
+          -Xms512m
+          -Xmx512m
+          -Djava.security.egd=file:/dev/./urandom
+        }
+    depends_on:
+      - yudao-mysql
+      - yudao-redis
+
+  yudao-admin:
+    build:
+      context: ./yudao-ui/yudao-ui-admin-vue3/master/yudao-ui-admin-vue3
+      args:
+        NODE_ENV:
+          ENV=${NODE_ENV:-production}
+          PUBLIC_PATH=${PUBLIC_PATH:-/}
+          VUE_APP_TITLE=${VUE_APP_TITLE:-芋道管理系统}
+          VUE_APP_BASE_API=${VUE_APP_BASE_API:-/prod-api}
+          VUE_APP_APP_NAME=${VUE_APP_APP_NAME:-/}
+          VUE_APP_TENANT_ENABLE=${VUE_APP_TENANT_ENABLE:-true}
+          VUE_APP_CAPTCHA_ENABLE=${VUE_APP_CAPTCHA_ENABLE:-true}
+          VUE_APP_DOC_ENABLE=${VUE_APP_DOC_ENABLE:-true}
+          VUE_APP_BAIDU_CODE=${VUE_APP_BAIDU_CODE:-fadc1bd5db1a1d6f581df60a1807f8ab}
+    image: yudao-admin
+    pull_policy: never  # 不要拉取（因为不存在这个镜像）
+    restart: unless-stopped
+    ports:
+      - "8888:80"
+    depends_on:
+      - yudao-server
+
+volumes:
+  yudao-mysql:
+    driver: local
+  yudao-redis:
+    driver: local

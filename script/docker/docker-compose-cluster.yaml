@@ -1,0 +1,88 @@
+services:
+
+  yudao-redis:
+    image: registry.cn-hangzhou.aliyuncs.com/one-registry/redis:6-alpine
+    volumes:
+      - yudao-redis:/data
+    deploy:
+      placement:
+        constraints:
+          - node.labels.role == server
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - my_network
+
+  yudao-mysql:
+    image: registry.cn-hangzhou.aliyuncs.com/one-registry/mysql:8
+    tty: true
+    volumes:
+      - yudao-mysql:/var/lib/mysql/ # 持久化 MySQL 数据
+      - ./sql/mysql:/docker-entrypoint-initdb.d  # 读取 SQL 脚本并执行
+    healthcheck:
+      test: ["CMD-SHELL", "ls -la /var/lib/mysql/ruoyi@002dvue@002dpro/system_users.ibd"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 10s
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-ruoyi-vue-pro}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.role == server
+    networks:
+      - my_network
+
+  yudao-server:
+    image: registry.cn-hangzhou.aliyuncs.com/one-registry/yudao-server
+    environment:
+      ARGS:
+        --spring.datasource.dynamic.datasource.master.url=${MASTER_DATASOURCE_URL:-jdbc:mysql://yudao-mysql:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true}
+        --spring.datasource.dynamic.datasource.master.username=${MASTER_DATASOURCE_USERNAME:-root}
+        --spring.datasource.dynamic.datasource.master.password=${MASTER_DATASOURCE_PASSWORD:-123456}
+        --spring.datasource.dynamic.datasource.slave.url=${SLAVE_DATASOURCE_URL:-jdbc:mysql://yudao-mysql:3306/ruoyi-vue-pro?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true}
+        --spring.datasource.dynamic.datasource.slave.username=${SLAVE_DATASOURCE_USERNAME:-root}
+        --spring.datasource.dynamic.datasource.slave.password=${SLAVE_DATASOURCE_PASSWORD:-123456}
+        --spring.data.redis.host=${REDIS_HOST:-yudao-redis}
+      SPRING_PROFILES_ACTIVE: local
+      JAVA_OPTS:
+        ${JAVA_OPTS:-
+          -Xms512m
+          -Xmx512m
+          -Djava.security.egd=file:/dev/./urandom
+        }
+    depends_on:
+      - yudao-mysql
+      - yudao-redis
+    deploy:
+      placement:
+        constraints:
+          - node.labels.role == server
+    networks:
+      - my_network
+
+  yudao-admin:
+    image: registry.cn-hangzhou.aliyuncs.com/one-registry/yudao-admin
+    ports:
+      - "8888:80"
+    depends_on:
+      - yudao-server
+    deploy:
+      placement:
+        constraints:
+          - node.labels.role == server
+    networks:
+      - my_network
+
+volumes:
+  yudao-mysql:
+    driver: local
+  yudao-redis:
+    driver: local
+
+networks:
+  my_network:
+    driver: overlay
