@@ -2,7 +2,7 @@
 #20250401
 #fred
 
-download_code() {
+download_admin_code() {
   #检查目标目录master是否存在
   if [ -d "./yudao-ui/yudao-ui-admin-vue3/master" ]; then
     echo "目标目录已存在，跳过创建"
@@ -16,6 +16,26 @@ download_code() {
 
     #下载代码
     git clone https://github.com/this-time-tech/yudao-ui-admin-vue3
+
+    #回到当前目录
+    cd ../../..
+  fi
+}
+
+download_app_code() {
+  #检查目标目录master是否存在
+  if [ -d "./yudao-ui/yudao-mall-uniapp/master" ]; then
+    echo "目标目录已存在，跳过创建"
+  else
+    echo "目标目录不存在，创建中..."
+    #建立一个目录
+    mkdir -p ./yudao-ui/yudao-mall-uniapp/master
+
+    #进入目录
+    cd ./yudao-ui/yudao-mall-uniapp/master
+
+    #下载代码
+    git clone https://github.com/this-time-tech/yudao-mall-uniapp
 
     #回到当前目录
     cd ../../..
@@ -113,7 +133,8 @@ main() {
     deploy_cluster
   else
     environment_check
-    download_code
+    download_admin_code
+    download_app_code
     deploy_code
   fi
 }
