@@ -55,6 +55,17 @@ services:
       - yudao-mysql
       - yudao-redis
 
+  yudao-mall-uniapp:
+    build:
+      context: ./yudao-ui/yudao-mall-uniapp/master/yudao-mall-uniapp
+    image: yudao-mall-uniapp
+    pull_policy: never  # 不要拉取（因为不存在这个镜像）
+    restart: unless-stopped
+    ports:
+      - "8899:80"
+    depends_on:
+      - yudao-server
+
   yudao-admin:
     build:
       context: ./yudao-ui/yudao-ui-admin-vue3/master/yudao-ui-admin-vue3
@@ -75,6 +86,7 @@ services:
     ports:
       - "8888:80"
     depends_on:
+      - yudao-mall-uniapp
       - yudao-server
 
 volumes:
