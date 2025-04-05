@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>cn.iocoder.boot</groupId>
     <artifactId>yudao</artifactId>
@@ -15,16 +15,18 @@
         <!-- 各种 module 拓展 -->
         <module>yudao-module-system</module>
         <module>yudao-module-infra</module>
-       <module>yudao-module-member</module>
-<!--        <module>yudao-module-bpm</module>-->
-<!--        <module>yudao-module-report</module>-->
-<!--        <module>yudao-module-mp</module>-->
-       <module>yudao-module-pay</module>
-       <module>yudao-module-mall</module>
-<!--        <module>yudao-module-crm</module>-->
-<!--        <module>yudao-module-erp</module>-->
-<!--        <module>yudao-module-ai</module>-->
-<!--        <module>yudao-module-iot</module>-->
+        <module>yudao-module-member</module>
+        <module>yudao-module-bpm</module>
+        <module>yudao-module-report</module>
+        <module>yudao-module-mp</module>
+        <module>yudao-module-pay</module>
+        <module>yudao-module-mall</module>
+        <module>yudao-module-crm</module>
+        <module>yudao-module-erp</module>
+        <module>yudao-module-ai</module>
+        <!-- <module>yudao-module-iot</module> --><!-- Caused by: groovy.lang.GroovyRuntimeException: 
+        Conflicting module versions. Module [groovy-datetime is loaded in version 3.0.21 and you are trying
+        to load version 4.0.24 -->
     </modules>
 
     <name>${project.artifactId}</name>
@@ -69,8 +71,10 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                 </plugin>
-                <!-- maven-compiler-plugin 插件，解决 spring-boot-configuration-processor + Lombok + MapStruct 组合 -->
-                <!-- https://stackoverflow.com/questions/33483697/re-run-spring-boot-configuration-annotation-processor-to-update-generated-metada -->
+                <!-- maven-compiler-plugin 插件，解决 spring-boot-configuration-processor + Lombok +
+                MapStruct 组合 -->
+                <!--
+                https://stackoverflow.com/questions/33483697/re-run-spring-boot-configuration-annotation-processor-to-update-generated-metada -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
