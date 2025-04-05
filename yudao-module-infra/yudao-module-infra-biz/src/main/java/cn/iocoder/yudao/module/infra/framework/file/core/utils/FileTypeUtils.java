@@ -4,10 +4,10 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.common.util.http.HttpUtils;
 import com.alibaba.ttl.TransmittableThreadLocal;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.apache.tika.Tika;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
