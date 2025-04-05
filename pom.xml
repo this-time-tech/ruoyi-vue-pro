@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>cn.iocoder.boot</groupId>
     <artifactId>yudao</artifactId>
@@ -15,18 +15,18 @@
         <!-- 各种 module 拓展 -->
         <module>yudao-module-system</module>
         <module>yudao-module-infra</module>
-       <module>yudao-module-member</module>
-<!--        <module>yudao-module-bpm</module>-->
-<!--        <module>yudao-module-report</module>-->
-<!--        <module>yudao-module-mp</module>-->
-       <module>yudao-module-pay</module>
-       <module>yudao-module-mall</module>
-<!--        <module>yudao-module-crm</module>-->
-<!--        <module>yudao-module-erp</module>-->
-<!--        <module>yudao-module-iot</module>-->
-        <!-- AI 大模型的开启，请参考 https://doc.iocoder.cn/ai/build/ 文档，对 JDK 版本要要求！ -->
-<!--        <module>yudao-module-ai</module>-->
-<!--        <module>yudao-module-iot</module>-->
+        <module>yudao-module-member</module>
+        <module>yudao-module-bpm</module>
+        <module>yudao-module-report</module>
+        <module>yudao-module-mp</module>
+        <module>yudao-module-pay</module>
+        <module>yudao-module-mall</module>
+        <module>yudao-module-crm</module>
+        <module>yudao-module-erp</module>
+        <module>yudao-module-ai</module>
+        <!-- <module>yudao-module-iot</module> --><!-- Caused by: groovy.lang.GroovyRuntimeException: 
+        Conflicting module versions. Module [groovy-datetime is loaded in version 3.0.21 and you are trying
+        to load version 4.0.24 -->
     </modules>
 
     <name>${project.artifactId}</name>
@@ -34,17 +34,17 @@
     <url>https://github.com/YunaiV/ruoyi-vue-pro</url>
 
     <properties>
-        <revision>2.4.1-jdk8-SNAPSHOT</revision>
+        <revision>2.4.1-SNAPSHOT</revision>
         <!-- Maven 相关 -->
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
         <!-- 看看咋放到 bom 里 -->
         <lombok.version>1.18.36</lombok.version>
-        <spring.boot.version>2.7.18</spring.boot.version>
+        <spring.boot.version>3.4.1</spring.boot.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -71,8 +71,10 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                 </plugin>
-                <!-- maven-compiler-plugin 插件，解决 spring-boot-configuration-processor + Lombok + MapStruct 组合 -->
-                <!-- https://stackoverflow.com/questions/33483697/re-run-spring-boot-configuration-annotation-processor-to-update-generated-metada -->
+                <!-- maven-compiler-plugin 插件，解决 spring-boot-configuration-processor + Lombok +
+                MapStruct 组合 -->
+                <!--
+                https://stackoverflow.com/questions/33483697/re-run-spring-boot-configuration-annotation-processor-to-update-generated-metada -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -95,6 +97,11 @@
                                 <version>${mapstruct.version}</version>
                             </path>
                         </annotationProcessorPaths>
+                        <!-- 编译参数写在 arg 内，解决 Spring Boot 3.2 的 Parameter Name Discovery 问题 -->
+                        <debug>false</debug>
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
                     </configuration>
                 </plugin>
                 <plugin>

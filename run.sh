@@ -77,6 +77,12 @@ deploy_code() {
     docker rmi -f yudao-admin
   fi
 
+  # 检查 yudao-mall-uniapp 是否存在，存在则删除
+  if docker images -q yudao-mall-uniapp > /dev/null; then
+    echo "清理原有镜像，准备重新构建"
+    docker rmi -f yudao-mall-uniapp
+  fi
+
   #复制文件
   cp ./script/docker/docker-compose.yaml ./docker-compose.yaml
   #启动容器
