@@ -59,6 +59,14 @@ environment_check() {
   fi
 }
 
+mvn_build(){
+  export COMPOSE_BAKE=true
+  if [ ! -f "./yudao-server/target/yudao-server.jar" ]; then
+    echo "yudao-server.jar 不存在！"
+    mvn clean package -DskipTests
+  fi
+}
+
 deploy_code() {
   #检查docker是否安装
   if ! command -v docker &>/dev/null; then
@@ -141,6 +149,7 @@ main() {
     environment_check
     download_admin_code
     download_app_code
+    mvn_build
     deploy_code
   fi
 }
