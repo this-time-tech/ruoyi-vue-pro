@@ -64,6 +64,19 @@ services:
     networks:
       - my_network
 
+  yudao-mall-uniapp:
+    image: registry.cn-hangzhou.aliyuncs.com/one-registry/yudao-mall-uniapp
+    ports:
+      - "8899:80"
+    depends_on:
+      - yudao-server
+    deploy:
+      placement:
+        constraints:
+          - node.labels.role == server
+    networks:
+      - my_network
+
   yudao-admin:
     image: registry.cn-hangzhou.aliyuncs.com/one-registry/yudao-admin
     ports:
